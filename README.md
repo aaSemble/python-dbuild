@@ -1,3 +1,5 @@
+[![Travis-CI Status](https://travis-ci.org/aaSemble/python-dbuild.svg)](https://travis-ci.org/aaSemble/python-dbuild)
+[![codecov.io](https://codecov.io/github/aaSemble/python-dbuild/coverage.svg?branch=master)](https://codecov.io/github/aaSemble/python-dbuild?branch=master)
 #python-dbuild
 python-dbuild is a tool that can be used to build Debian packages using docker
 containers. This will improve the security compared with sbuild on package builds
