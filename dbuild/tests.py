@@ -39,3 +39,23 @@ class DbuildTests(TestCase):
 
         docker_client.build.assert_called_with(path='some/path', rm=True, forcerm=True,
                                                tag='sometag', decode=True, nocache=False)
+
+    def test_create_container_defaults(self):
+        docker_client = mock.MagicMock()
+        dbuild.create_container(docker_client, 'imagename')
+        docker_client.create_container.assert_called_with(image='imagename', name=None,
+                                                          command=None, environment=None,
+                                                          network_disabled=False, volumes=None,
+                                                          working_dir=None, host_config=None)
+
+    def test_create_container_shared_volumes(self):
+        docker_client = mock.MagicMock()
+        dbuild.create_container(docker_client, 'imagename', shared_volumes={'/something': '/else'})
+
+        docker_client.create_host_config.assert_called_with(binds=['/something:/else'])
+
+        host_config = docker_client.create_host_config.return_value
+        docker_client.create_container.assert_called_with(image='imagename', name=None,
+                                                          command=None, environment=None,
+                                                          network_disabled=False, volumes=['/else'],
+                                                          working_dir=None, host_config=host_config)

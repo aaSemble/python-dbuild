@@ -37,6 +37,7 @@ def create_container(docker_client, image, name=None, command=None, env=None,
         binds = ['{}:{}'.format(k, v) for k, v in six.iteritems(shared_volumes)]
         host_config = docker_client.create_host_config(binds=binds)
     else:
+        volumes = None
         host_config = None
 
     container = docker_client.create_container(
