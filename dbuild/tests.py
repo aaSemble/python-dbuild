@@ -85,3 +85,15 @@ class DbuildTests(TestCase):
         self.assertEquals(list(rv), ['line1', 'line2', 'line3'])
 
         docker_client.logs.assert_called_with(container=1234, stream=True, timestamps=True)
+
+    def _test_remove_container(self, expected_force, **kwargs):
+        docker_client = mock.MagicMock()
+
+        dbuild.remove_container(docker_client, 1234, **kwargs)
+
+        docker_client.remove_container.assert_called_with(container=1234, force=expected_force)
+
+    def test_remove_container(self):
+        self._test_remove_container(False)
+        self._test_remove_container(False, force=False)
+        self._test_remove_container(True, force=True)
