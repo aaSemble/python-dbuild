@@ -26,7 +26,7 @@ def build_image(docker_client, path, tag, nocache=False):
         if 'stream' in line:
             yield line['stream']
         if 'error' in line:
-            raise exceptions.DbuildDockerBuildFailedException(line['error'], line.get['errorDetails'])
+            raise exceptions.DbuildDockerBuildFailedException(line['error'], line.get('errorDetails'))
 
 
 def create_container(docker_client, image, name=None, command=None, env=None,
