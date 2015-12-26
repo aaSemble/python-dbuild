@@ -1,3 +1,7 @@
+import os
+import os.path
+import shutil
+import tempfile
 import types
 from unittest import TestCase
 
@@ -97,3 +101,19 @@ class DbuildTests(TestCase):
         self._test_remove_container(False)
         self._test_remove_container(False, force=False)
         self._test_remove_container(True, force=True)
+
+    def test_create_dockerfile(self):
+        tmpdir = tempfile.mkdtemp()
+
+        try:
+            dbuild.create_dockerfile('ubuntu', 'trusty', tmpdir)
+
+            with open(os.path.join(tmpdir, 'Dockerfile'), 'r') as fp:
+                generated_content = fp.read()
+
+            with open(os.path.join(os.path.dirname(__file__), 'test_data', 'Dockerfile1'), 'r') as fp:
+                expected_content = fp.read()
+
+            self.assertEquals(expected_content, generated_content)
+        finally:
+            shutil.rmtree(tmpdir)
