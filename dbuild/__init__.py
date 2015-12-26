@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 import argparse
-import sys
 import os
 import shutil
-from dbuild import exceptions
+import sys
+from tempfile import mkdtemp
+
+from docker import Client
+
+from jinja2 import Environment, FileSystemLoader
 
 import six
 
-from jinja2 import Environment, FileSystemLoader
-from docker import Client
-from tempfile import mkdtemp
+from dbuild import exceptions
 
 
 def docker_client(url='unix://var/run/docker.sock'):
@@ -19,8 +21,6 @@ def docker_client(url='unix://var/run/docker.sock'):
 
 def build_image(docker_client, path, tag, nocache=False):
     """ Build docker image"""
-    message = ''
-    errors = []
     for line in docker_client.build(path=path, rm=True, forcerm=True,
                                     tag=tag, decode=True, nocache=nocache):
         if 'stream' in line:
@@ -61,7 +61,7 @@ def wait_container(docker_client, container):
 def container_logs(docker_client, container):
     """ Get container stdout and stderr """
     for log in docker_client.logs(container=container, stream=True,
-                                     timestamps=True):
+                                  timestamps=True):
         yield log.strip()
 
 
@@ -113,7 +113,8 @@ def docker_build(build_dir, build_type, source_dir='source', force_rm=False,
     extra_repo_keys_file: a file which contain any apt keys required for extra
                           repos. It is a relative path from build_dir
     build_cache:    Whether to use docker build cache or not
-    proxy:          value of proxy to be passed when used behind proxy settings otherwise it will be default empty
+    proxy:          value of proxy to be passed when used behind proxy settings
+                    otherwise it will be default empty
     build_owner:    user id which will own all build files
     """
 
@@ -164,7 +165,8 @@ def docker_build(build_dir, build_type, source_dir='source', force_rm=False,
                                  command=['bash', '-c', command],
                                  shared_volumes={build_dir: '/build'})
     print(container)
-    response = start_container(c, container)
+
+    start_container(c, container)
 
     for l in container_logs(c, container):
         print(l.decode('utf-8'))
@@ -222,7 +224,8 @@ def main(argv=sys.argv):
     ap.add_argument('--build-cache', action='store_false', default=True,
                     help='Whether to use docker build cache or not')
     ap.add_argument('--proxy', type=str, default="",
-                    help='Value of proxy to be passed when used behind proxy  otherwise it will be default empty')
+                    help='Value of proxy to be passed when used behind proxy'
+                         'otherwise it will be default empty')
     args = ap.parse_args()
 
     try:
@@ -232,10 +235,10 @@ def main(argv=sys.argv):
                      dist=args.dist, release=args.release,
                      extra_repos_file=args.extra_repos_file,
                      extra_repo_keys_file=args.extra_repo_keys_file,
-                     build_cache=args.build_cache,proxy=args.proxy)
+                     build_cache=args.build_cache, proxy=args.proxy)
     except exceptions.DbuildSourceBuildFailedException:
-        print('ERROR | Source build failed for build directory: %s' \
-            % args.build_dir)
+        print('ERROR | Source build failed for build directory: %s'
+              % args.build_dir)
         return False
 
     try:
@@ -245,10 +248,10 @@ def main(argv=sys.argv):
                      dist=args.dist, release=args.release,
                      extra_repos_file=args.extra_repos_file,
                      extra_repo_keys_file=args.extra_repo_keys_file,
-                     build_cache=args.build_cache,proxy=args.proxy)
+                     build_cache=args.build_cache, proxy=args.proxy)
     except exceptions.DbuildBinaryBuildFailedException:
-        print('ERROR | Binary build failed for build directory: %s' \
-            % args.build_dir)
+        print('ERROR | Binary build failed for build directory: %s'
+              % args.build_dir)
         return False
 
     return True

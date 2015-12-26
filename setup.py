@@ -14,7 +14,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 with open('requirements.txt', 'r') as fp:
     requirements = [x.strip() for x in fp]
