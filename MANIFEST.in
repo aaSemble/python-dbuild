@@ -1,3 +1,4 @@
 include requirements.txt
+include dbuild/test_data/Dockerfile1
 recursive-include dbuild/templates *
 recursive-include dbuild/scripts *
