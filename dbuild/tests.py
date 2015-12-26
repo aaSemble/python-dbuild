@@ -59,3 +59,11 @@ class DbuildTests(TestCase):
                                                           command=None, environment=None,
                                                           network_disabled=False, volumes=['/else'],
                                                           working_dir=None, host_config=host_config)
+
+    def test_start_container(self):
+        docker_client = mock.MagicMock()
+        container = {'Id': 1234}
+
+        dbuild.start_container(docker_client, container)
+
+        docker_client.start.assert_called_with(container=1234)
