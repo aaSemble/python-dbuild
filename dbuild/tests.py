@@ -67,3 +67,21 @@ class DbuildTests(TestCase):
         dbuild.start_container(docker_client, container)
 
         docker_client.start.assert_called_with(container=1234)
+
+    def test_wait_container(self):
+        docker_client = mock.MagicMock()
+
+        dbuild.wait_container(docker_client, 1234)
+
+        docker_client.wait.assert_called_with(container=1234)
+
+    def test_container_logs(self):
+        docker_client = mock.MagicMock()
+        docker_client.logs.return_value = iter(['line1', 'line2', 'line3'])
+
+        rv = dbuild.container_logs(docker_client, 1234)
+
+        self.assertEquals(type(rv), types.GeneratorType)
+        self.assertEquals(list(rv), ['line1', 'line2', 'line3'])
+
+        docker_client.logs.assert_called_with(container=1234, stream=True, timestamps=True)
