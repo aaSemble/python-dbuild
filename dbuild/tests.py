@@ -132,15 +132,17 @@ class DbuildTests(TestCase):
         finally:
             shutil.rmtree(tmpdir)
 
-    def test_build_cli(self):
-        tmpdir = tempfile.mkdtemp()
-        try:
-            shutil.copytree(os.path.join(os.path.dirname(__file__), 'test_data', 'pkg1'),
-                            os.path.join(tmpdir, 'source'))
-            dbuild.main(['--build-owner={}'.format(os.getuid()), tmpdir])
-            for f in ['buildsvctest_0.1.dsc', 'buildsvctest_0.1.tar.gz',
-                      'buildsvctest_0.1_amd64.changes', 'buildsvctest_0.1_amd64.deb',
-                      'buildsvctest_0.1_source.changes']:
-                assert os.path.exists(os.path.join(tmpdir, f)), '{} was missing'.format(f)
-        finally:
-            shutil.rmtree(tmpdir)
+    @mock.patch('dbuild.docker_build')
+    def test_build_cli(self, docker_build):
+        dbuild.main(['/some/dir'])
+        self.assertEquals(docker_build.call_args_list,
+                          [mock.call(build_cache=True, build_dir='/some/dir', build_owner=None,
+                                     build_type='source', dist='ubuntu',
+                                     docker_url='unix://var/run/docker.sock', extra_repo_keys_file='keys',
+                                     extra_repos_file='repos', force_rm=False, proxy='', release='trusty',
+                                     source_dir='source'),
+                           mock.call(build_cache=True, build_dir='/some/dir', build_owner=None,
+                                     build_type='binary', dist='ubuntu',
+                                     docker_url='unix://var/run/docker.sock',
+                                     extra_repo_keys_file='keys', extra_repos_file='repos',
+                                     force_rm=False, proxy='', release='trusty', source_dir='source')])
