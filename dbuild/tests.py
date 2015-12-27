@@ -132,6 +132,29 @@ class DbuildTests(TestCase):
         finally:
             shutil.rmtree(tmpdir)
 
+    def test_build_failed_source_build(self):
+        tmpdir = tempfile.mkdtemp()
+        try:
+            shutil.copytree(os.path.join(os.path.dirname(__file__), 'test_data', 'pkg2'),
+                            os.path.join(tmpdir, 'source'))
+            self.assertRaises(dbuild.exceptions.DbuildSourceBuildFailedException,
+                              dbuild.docker_build, tmpdir, build_type='source',
+                              force_rm=True, build_owner=os.getuid())
+        finally:
+            shutil.rmtree(tmpdir)
+
+    def test_build_failed_binary_build(self):
+        tmpdir = tempfile.mkdtemp()
+        try:
+            shutil.copytree(os.path.join(os.path.dirname(__file__), 'test_data', 'pkg3'),
+                            os.path.join(tmpdir, 'source'))
+            dbuild.docker_build(tmpdir, build_type='source', build_owner=os.getuid())
+            self.assertRaises(dbuild.exceptions.DbuildBinaryBuildFailedException,
+                              dbuild.docker_build, tmpdir, build_type='binary',
+                              force_rm=True, build_owner=os.getuid())
+        finally:
+            shutil.rmtree(tmpdir)
+
     @mock.patch('dbuild.docker_build')
     def test_build_cli(self, docker_build):
         dbuild.main(['/some/dir'])
