@@ -227,7 +227,9 @@ def main(argv=sys.argv):
     ap.add_argument('--proxy', type=str, default="",
                     help='Value of proxy to be passed when used behind proxy'
                          'otherwise it will be default empty')
-    args = ap.parse_args()
+    ap.add_argument('--build-owner', action='store', type=int,
+                    help='uid to reassign everything to')
+    args = ap.parse_args(argv)
 
     try:
         docker_build(build_dir=args.build_dir,
@@ -236,7 +238,8 @@ def main(argv=sys.argv):
                      dist=args.dist, release=args.release,
                      extra_repos_file=args.extra_repos_file,
                      extra_repo_keys_file=args.extra_repo_keys_file,
-                     build_cache=args.build_cache, proxy=args.proxy)
+                     build_cache=args.build_cache, proxy=args.proxy,
+                     build_owner=args.build_owner)
     except exceptions.DbuildSourceBuildFailedException:
         print('ERROR | Source build failed for build directory: %s'
               % args.build_dir)
@@ -249,7 +252,8 @@ def main(argv=sys.argv):
                      dist=args.dist, release=args.release,
                      extra_repos_file=args.extra_repos_file,
                      extra_repo_keys_file=args.extra_repo_keys_file,
-                     build_cache=args.build_cache, proxy=args.proxy)
+                     build_cache=args.build_cache, proxy=args.proxy,
+                     build_owner=args.build_owner)
     except exceptions.DbuildBinaryBuildFailedException:
         print('ERROR | Binary build failed for build directory: %s'
               % args.build_dir)
