@@ -117,3 +117,17 @@ class DbuildTests(TestCase):
             self.assertEquals(expected_content, generated_content)
         finally:
             shutil.rmtree(tmpdir)
+
+    def test_build(self):
+        tmpdir = tempfile.mkdtemp()
+        try:
+            shutil.copytree(os.path.join(os.path.dirname(__file__), 'test_data', 'pkg1'),
+                            os.path.join(tmpdir, 'source'))
+            dbuild.docker_build(tmpdir, build_type='source', build_owner=os.getuid())
+            dbuild.docker_build(tmpdir, build_type='binary', build_owner=os.getuid())
+            for f in ['buildsvctest_0.1.dsc', 'buildsvctest_0.1.tar.gz',
+                      'buildsvctest_0.1_amd64.changes', 'buildsvctest_0.1_amd64.deb',
+                      'buildsvctest_0.1_source.changes']:
+                assert os.path.exists(os.path.join(tmpdir, f)), '{} was missing'.format(f)
+        finally:
+            shutil.rmtree(tmpdir)
