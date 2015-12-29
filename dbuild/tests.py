@@ -124,7 +124,16 @@ class DbuildTests(TestCase):
             shutil.copytree(os.path.join(os.path.dirname(__file__), 'test_data', 'pkg1'),
                             os.path.join(tmpdir, 'source'))
             dbuild.docker_build(tmpdir, build_type='source', build_owner=os.getuid())
-            dbuild.docker_build(tmpdir, build_type='binary', build_owner=os.getuid())
+
+            create_container_real = dbuild.create_container
+
+            # Spy on the calls to create_container
+            with mock.patch('dbuild.create_container') as create_container:
+                create_container.side_effect = lambda *args, **kwargs: create_container_real(*args, **kwargs)
+
+                dbuild.docker_build(tmpdir, build_type='binary', build_owner=os.getuid(), parallel=7)
+                self.assertIn('-j7', create_container.call_args[1]['command'][2])
+
             for f in ['buildsvctest_0.1.dsc', 'buildsvctest_0.1.tar.gz',
                       'buildsvctest_0.1_amd64.changes', 'buildsvctest_0.1_amd64.deb',
                       'buildsvctest_0.1_source.changes']:
@@ -168,4 +177,5 @@ class DbuildTests(TestCase):
                                      build_type='binary', dist='ubuntu',
                                      docker_url='unix://var/run/docker.sock',
                                      extra_repo_keys_file='keys', extra_repos_file='repos',
-                                     force_rm=False, proxy='', release='trusty', source_dir='source')])
+                                     force_rm=False, proxy='', parallel=1, release='trusty',
+                                     source_dir='source')])
