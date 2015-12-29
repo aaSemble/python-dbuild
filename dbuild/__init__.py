@@ -96,7 +96,7 @@ def docker_build(build_dir, build_type, source_dir='source', force_rm=False,
                  docker_url='unix://var/run/docker.sock', dist='ubuntu',
                  release='trusty', extra_repos_file='repos',
                  extra_repo_keys_file='keys', build_cache=True, proxy="",
-                 build_owner=None):
+                 build_owner=None, **kwargs):
     """
     build_dir:  build directory, this directory will be mounted to /build in
                 container
