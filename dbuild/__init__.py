@@ -96,7 +96,7 @@ def docker_build(build_dir, build_type, source_dir='source', force_rm=False,
                  docker_url='unix://var/run/docker.sock', dist='ubuntu',
                  release='trusty', extra_repos_file='repos',
                  extra_repo_keys_file='keys', build_cache=True, proxy="",
-                 build_owner=None, **kwargs):
+                 build_owner=None, parallel=1, **kwargs):
     """
     build_dir:  build directory, this directory will be mounted to /build in
                 container
@@ -117,6 +117,7 @@ def docker_build(build_dir, build_type, source_dir='source', force_rm=False,
     proxy:          value of proxy to be passed when used behind proxy settings
                     otherwise it will be default empty
     build_owner:    user id which will own all build files
+    parallel:       how many processes to run in parallel
     kwargs:         dict of unknown arguments. Ignored. For forward compatibility.
     """
 
@@ -139,7 +140,7 @@ def docker_build(build_dir, build_type, source_dir='source', force_rm=False,
         command += "dpkg-source -x /build/*.dsc /build/pkgbuild/ && \
                       cd /build/pkgbuild && \
                       /usr/lib/pbuilder/pbuilder-satisfydepends && \
-                      dpkg-buildpackage -b -uc -us -j"
+                      dpkg-buildpackage -b -uc -us -j{}".format(parallel)
         cwd = '/build'
     else:
         raise exceptions.DbuildBuildFailedException(
@@ -230,6 +231,8 @@ def main(argv=sys.argv):
                          'otherwise it will be default empty')
     ap.add_argument('--build-owner', action='store', type=int,
                     help='uid to reassign everything to')
+    ap.add_argument('--parallel', '-j', action='store', type=int,
+                    default=1, help='how many processes to run in parallel')
     args = ap.parse_args(argv)
 
     try:
@@ -254,7 +257,8 @@ def main(argv=sys.argv):
                      extra_repos_file=args.extra_repos_file,
                      extra_repo_keys_file=args.extra_repo_keys_file,
                      build_cache=args.build_cache, proxy=args.proxy,
-                     build_owner=args.build_owner)
+                     build_owner=args.build_owner,
+                     parallel=args.parallel)
     except exceptions.DbuildBinaryBuildFailedException:
         print('ERROR | Binary build failed for build directory: %s'
               % args.build_dir)
