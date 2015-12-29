@@ -134,7 +134,7 @@ def docker_build(build_dir, build_type, source_dir='source', force_rm=False,
                    && apt-get -y dist-upgrade && '
 
     if build_type == 'source':
-        command += 'dpkg-buildpackage -S -nc -uc -us'
+        command += 'dpkg-buildpackage -S -I -nc -uc -us'
         cwd = '/build/' + source_dir
     elif build_type == 'binary':
         command += "dpkg-source -x /build/*.dsc /build/pkgbuild/ && \
