@@ -1,0 +1,12 @@
+Source: pkg4
+Section: admin
+Priority: optional
+Maintainer: Peter Jensen <pljensen12345@gmail.com>
+Build-Depends: debhelper
+Standards-Version: 3.9.3
+
+Package: pkg4
+Architecture: all
+Depends: ${shlibs:depends}
+Description: pkg4
+ Pkg4

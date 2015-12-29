@@ -1,6 +1,7 @@
 import os
 import os.path
 import shutil
+import tarfile
 import tempfile
 import types
 from unittest import TestCase
@@ -129,6 +130,25 @@ class DbuildTests(TestCase):
                       'buildsvctest_0.1_amd64.changes', 'buildsvctest_0.1_amd64.deb',
                       'buildsvctest_0.1_source.changes']:
                 assert os.path.exists(os.path.join(tmpdir, f)), '{} was missing'.format(f)
+        finally:
+            shutil.rmtree(tmpdir)
+
+    def test_discards_dot_git_dir(self):
+        tmpdir = tempfile.mkdtemp()
+        try:
+            shutil.copytree(os.path.join(os.path.dirname(__file__), 'test_data', 'pkg4'),
+                            os.path.join(tmpdir, 'source'))
+
+            os.mkdir(os.path.join(tmpdir, 'source', '.git'))
+
+            with open(os.path.join(tmpdir, 'source', '.git', 'somefile'), 'w') as fp:
+                fp.write('this should be discarded')
+
+            dbuild.docker_build(tmpdir, build_type='source', build_owner=os.getuid())
+
+            tf = tarfile.open(os.path.join(tmpdir, 'pkg4_1.0-1.tar.gz'), 'r:*')
+            self.assertFalse(list(filter(lambda ti: '/.git/' in ti.name, tf.getmembers())),
+                             'Tarball contained .git dir' + repr(tf.getmembers()))
         finally:
             shutil.rmtree(tmpdir)
 
