@@ -117,6 +117,7 @@ def docker_build(build_dir, build_type, source_dir='source', force_rm=False,
     proxy:          value of proxy to be passed when used behind proxy settings
                     otherwise it will be default empty
     build_owner:    user id which will own all build files
+    kwargs:         dict of unknown arguments. Ignored. For forward compatibility.
     """
 
     command = ''
