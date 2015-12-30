@@ -203,7 +203,7 @@ def docker_build(build_dir, build_type, source_dir='source', force_rm=False,
             'Binary build FAILED')
 
 
-def main(argv=sys.argv):
+def main(argv=sys.argv[1:]):
     ap = argparse.ArgumentParser(
         description='Build debian packages in docker container')
     ap.add_argument('build_dir', type=str, help='package build directory')
@@ -268,4 +268,4 @@ def main(argv=sys.argv):
     return True
 
 if __name__ == "__main__":
-    sys.exit(not main(sys.argv))
+    sys.exit(not main(sys.argv[1:]))
