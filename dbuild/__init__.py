@@ -172,7 +172,8 @@ def docker_build(build_dir, build_type, source_dir='source', force_rm=False,
     start_container(c, container)
 
     for l in container_logs(c, container):
-        print(l.decode('utf-8'))
+        sys.stdout.write(l.decode('utf-8'))
+        sys.stdout.write('\n')
 
     rv = wait_container(c, container)
 
