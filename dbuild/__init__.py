@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import argparse
+import codecs
 import os
 import shutil
 import sys
@@ -171,9 +172,14 @@ def docker_build(build_dir, build_type, source_dir='source', force_rm=False,
 
     start_container(c, container)
 
+    if sys.version_info.major == 2:
+        stdout = codecs.getwriter('utf-8')(sys.stdout)
+    else:
+        stdout = sys.stdout
+
     for l in container_logs(c, container):
-        sys.stdout.write(l.decode('utf-8'))
-        sys.stdout.write('\n')
+        stdout.write(l.decode('utf-8'))
+        stdout.write('\n')
 
     rv = wait_container(c, container)
 
