@@ -186,16 +186,18 @@ class DbuildTests(TestCase):
 
     @mock.patch('dbuild.docker_build')
     def test_build_cli(self, docker_build):
-        dbuild.main(['/some/dir'])
+        dbuild.main(['--no-include-timestamps', '/some/dir'])
         self.assertEquals(docker_build.call_args_list,
                           [mock.call(build_cache=True, build_dir='/some/dir', build_owner=None,
                                      build_type='source', dist='ubuntu',
                                      docker_url='unix://var/run/docker.sock', extra_repo_keys_file='keys',
                                      extra_repos_file='repos', force_rm=False, proxy='', release='trusty',
-                                     source_dir='source', no_default_sources=False),
+                                     source_dir='source', no_default_sources=False,
+                                     include_timestamps=False),
                            mock.call(build_cache=True, build_dir='/some/dir', build_owner=None,
                                      build_type='binary', dist='ubuntu',
                                      docker_url='unix://var/run/docker.sock',
                                      extra_repo_keys_file='keys', extra_repos_file='repos',
                                      force_rm=False, proxy='', parallel=1, release='trusty',
-                                     source_dir='source', no_default_sources=False)])
+                                     source_dir='source', no_default_sources=False,
+                                     include_timestamps=False)])

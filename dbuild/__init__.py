@@ -60,10 +60,10 @@ def wait_container(docker_client, container):
     return rv
 
 
-def container_logs(docker_client, container):
+def container_logs(docker_client, container, include_timestamps=True):
     """ Get container stdout and stderr """
     for log in docker_client.logs(container=container, stream=True,
-                                  timestamps=True):
+                                  timestamps=include_timestamps):
         yield log.strip()
 
 
@@ -98,7 +98,7 @@ def docker_build(build_dir, build_type, source_dir='source', force_rm=False,
                  release='trusty', extra_repos_file='repos',
                  extra_repo_keys_file='keys', build_cache=True, proxy="",
                  build_owner=None, parallel=1, no_default_sources=False,
-                 **kwargs):
+                 include_timestamps=True, **kwargs):
     """
     build_dir:  build directory, this directory will be mounted to /build in
                 container
@@ -121,6 +121,7 @@ def docker_build(build_dir, build_type, source_dir='source', force_rm=False,
     build_owner:    user id which will own all build files
     parallel:       how many processes to run in parallel
     no_default_sources: only use sources from extra_repos_file
+    include_timestamps: show timestamps
     kwargs:         dict of unknown arguments. Ignored. For forward compatibility.
     """
 
@@ -248,6 +249,9 @@ def main(argv=sys.argv[1:]):
     ap.add_argument('--no-default-sources', action='store_true',
                     help='Discard existing sources, only use the ones '
                          'passed in')
+    ap.add_argument('--no-include-timestamps', dest='include_timestamps',
+                    action='store_false',
+                    help='Don\'t include timestamps in output')
     args = ap.parse_args(argv)
 
     try:
@@ -259,7 +263,8 @@ def main(argv=sys.argv[1:]):
                      extra_repo_keys_file=args.extra_repo_keys_file,
                      build_cache=args.build_cache, proxy=args.proxy,
                      build_owner=args.build_owner,
-                     no_default_sources=args.no_default_sources)
+                     no_default_sources=args.no_default_sources,
+                     include_timestamps=args.include_timestamps)
     except exceptions.DbuildSourceBuildFailedException:
         print('ERROR | Source build failed for build directory: %s'
               % args.build_dir)
@@ -275,7 +280,8 @@ def main(argv=sys.argv[1:]):
                      build_cache=args.build_cache, proxy=args.proxy,
                      build_owner=args.build_owner,
                      parallel=args.parallel,
-                     no_default_sources=args.no_default_sources)
+                     no_default_sources=args.no_default_sources,
+                     include_timestamps=args.include_timestamps)
     except exceptions.DbuildBinaryBuildFailedException:
         print('ERROR | Binary build failed for build directory: %s'
               % args.build_dir)
