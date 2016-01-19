@@ -97,7 +97,8 @@ def docker_build(build_dir, build_type, source_dir='source', force_rm=False,
                  docker_url='unix://var/run/docker.sock', dist='ubuntu',
                  release='trusty', extra_repos_file='repos',
                  extra_repo_keys_file='keys', build_cache=True, proxy="",
-                 build_owner=None, parallel=1, **kwargs):
+                 build_owner=None, parallel=1, no_default_sources=False,
+                 **kwargs):
     """
     build_dir:  build directory, this directory will be mounted to /build in
                 container
@@ -119,10 +120,14 @@ def docker_build(build_dir, build_type, source_dir='source', force_rm=False,
                     otherwise it will be default empty
     build_owner:    user id which will own all build files
     parallel:       how many processes to run in parallel
+    no_default_sources: only use sources from extra_repos_file
     kwargs:         dict of unknown arguments. Ignored. For forward compatibility.
     """
 
     command = ''
+
+    if no_default_sources:
+        command += '> /etc/apt/sources.list && '
 
     if os.path.exists(os.path.join(build_dir, extra_repos_file)):
         command += 'cp /build/%s \
@@ -240,6 +245,9 @@ def main(argv=sys.argv[1:]):
                     help='uid to reassign everything to')
     ap.add_argument('--parallel', '-j', action='store', type=int,
                     default=1, help='how many processes to run in parallel')
+    ap.add_argument('--no-default-sources', action='store_true',
+                    help='Discard existing sources, only use the ones '
+                         'passed in')
     args = ap.parse_args(argv)
 
     try:
@@ -250,7 +258,8 @@ def main(argv=sys.argv[1:]):
                      extra_repos_file=args.extra_repos_file,
                      extra_repo_keys_file=args.extra_repo_keys_file,
                      build_cache=args.build_cache, proxy=args.proxy,
-                     build_owner=args.build_owner)
+                     build_owner=args.build_owner,
+                     no_default_sources=args.no_default_sources)
     except exceptions.DbuildSourceBuildFailedException:
         print('ERROR | Source build failed for build directory: %s'
               % args.build_dir)
@@ -265,7 +274,8 @@ def main(argv=sys.argv[1:]):
                      extra_repo_keys_file=args.extra_repo_keys_file,
                      build_cache=args.build_cache, proxy=args.proxy,
                      build_owner=args.build_owner,
-                     parallel=args.parallel)
+                     parallel=args.parallel,
+                     no_default_sources=args.no_default_sources)
     except exceptions.DbuildBinaryBuildFailedException:
         print('ERROR | Binary build failed for build directory: %s'
               % args.build_dir)
