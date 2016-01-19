@@ -192,10 +192,10 @@ class DbuildTests(TestCase):
                                      build_type='source', dist='ubuntu',
                                      docker_url='unix://var/run/docker.sock', extra_repo_keys_file='keys',
                                      extra_repos_file='repos', force_rm=False, proxy='', release='trusty',
-                                     source_dir='source'),
+                                     source_dir='source', no_default_sources=False),
                            mock.call(build_cache=True, build_dir='/some/dir', build_owner=None,
                                      build_type='binary', dist='ubuntu',
                                      docker_url='unix://var/run/docker.sock',
                                      extra_repo_keys_file='keys', extra_repos_file='repos',
                                      force_rm=False, proxy='', parallel=1, release='trusty',
-                                     source_dir='source')])
+                                     source_dir='source', no_default_sources=False)])
