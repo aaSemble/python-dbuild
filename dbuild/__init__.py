@@ -183,7 +183,8 @@ def docker_build(build_dir, build_type, source_dir='source', force_rm=False,
     else:
         stdout = sys.stdout
 
-    for l in container_logs(c, container):
+    for l in container_logs(c, container,
+                            include_timestamps=include_timestamps):
         stdout.write(l.decode('utf-8'))
         stdout.write('\n')
 
